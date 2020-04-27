@@ -3,7 +3,8 @@
 .dart_tool/
 .packages
 build/
-pubspec.lock # we are doing a library package, not application package
+# we are doing a library package, not application package
+pubspec.lock 
 
 # API documentation directory created by dartdoc:
 doc/api/
