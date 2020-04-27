@@ -32,7 +32,7 @@ TODO
 
 ## Public API
 
-This package follows Semantic Versioning[https://semver.org/].
+This package follows [Semantic Versioning](https://semver.org/).
 
 TODO: link to the public API documentation. Important to be exhaustive here.
 
