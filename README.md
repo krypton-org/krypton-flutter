@@ -11,13 +11,13 @@ First, depend on this package:
 
 ```
 dependencies:
-  krypton_core: ^0.1.0
+  krypton: ^0.1.0
 ```
 
 And then import it inside your dart code:
 
 ```
-import 'package:krypton_core/client.dart';
+import 'package:krypton/client.dart';
 ```
 
 ### Usage
