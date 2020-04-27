@@ -44,8 +44,11 @@ TODO
 
 ### Development setup
 
-Install dart...
-TODO
+* Install dart
+* Clone the repository
+* cd to the root directory of the repository
+* Run `pub get`
+* Start coding!
 
 ## License and copyright
 
