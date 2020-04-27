@@ -9,14 +9,14 @@ It is based on the [Krypton client specification](https://github.com/krypton-org
 
 First, depend on this package:
 
-```
+```yaml
 dependencies:
   krypton: ^0.1.0
 ```
 
 And then import it inside your dart code:
 
-```
+```dart
 import 'package:krypton/client.dart';
 ```
 
