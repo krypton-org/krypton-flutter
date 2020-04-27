@@ -1,0 +1,21 @@
+## List of files to ignore according to https://dart.dev/guides/libraries/private-files
+# Files and directories created by pub:
+.dart_tool/
+.packages
+build/
+pubspec.lock # we are doing a library package, not application package
+
+# API documentation directory created by dartdoc:
+doc/api/
+
+## Files and directories created by other development environments:
+# IntelliJ
+*.iml
+*.ipr
+*.iws
+.idea/
+# Mac
+.DS_Store
+
+# VIM/Emacs
+.swp

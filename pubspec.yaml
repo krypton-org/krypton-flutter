@@ -1,0 +1,9 @@
+name: krypton
+version: 0.1.0
+description: >-
+  Client library to connect to a Krypton Authentification server.
+homepage: https://github.com/krypton-org/krypton-flutter
+environment:
+  sdk: '>=2.0.0 <3.0.0'
+dependencies:
+  graphql: ^3.0.0
