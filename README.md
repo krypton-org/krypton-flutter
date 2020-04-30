@@ -54,13 +54,13 @@ TODO
 
 * The development follows [TDD](https://en.wikipedia.org/wiki/Test-driven_development)'s principles. Write tests first, then make it pass.
 * We follow the ["GitLab Workflow logic"](https://docs.gitlab.com/ee/development/contributing/merge_request_workflow.html), except on GitHub ;). In short:
-** Nothing is pushed directly to master.
-** Every new feature or bug fix start with opening an issue.
-** Then, discuss the issue until a consensus is found.
-** Either:
-*** Clone the repository. Create a new branch and work there. <<< Preferred way
-*** Fork the repository. Create a new branch and work there.
-** Finally, send a pull-request to the original repository linking to the previously created issue.
+  * Nothing is pushed directly to master.
+  * Every new feature or bug fix start with opening an issue.
+  * Then, discuss the issue until a consensus is found.
+  * Either:
+    * Clone the repository. Create a new branch and work there. <<< Preferred way
+    * Fork the repository. Create a new branch and work there.
+  * Finally, send a pull-request to the original repository linking to the previously created issue.
 
 
 
