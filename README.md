@@ -17,7 +17,7 @@ dependencies:
 And then import it inside your dart code:
 
 ```dart
-import 'package:krypton/client.dart';
+import 'package:krypton/krypton.dart';
 ```
 
 ### Usage
