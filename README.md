@@ -1,6 +1,6 @@
 # Krypton Flutter Client
 
-This repository is a pure Dart client library to connect to [Krypton Authentification server](https://github.com/krypton-org/krypton-auth).
+This repository is the Dart library to connect to [Krypton Authentification server](https://github.com/krypton-org/krypton-auth).
 It is based on the [Krypton client specification](https://github.com/krypton-org/krypton-drafts/tree/master/client).
 
 ## Getting started
