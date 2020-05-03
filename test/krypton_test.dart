@@ -10,7 +10,7 @@ import 'package:krypton/krypton.dart';
 import 'package:test/test.dart';
 
 void main() {
-  final _kryptonClient = KryptonClient("http://localhost:5000");
+  final _kryptonClient = KryptonClient.fromString("http://localhost:5000");
 
   /// This test should not throw any exception
   test('register a user with basic email password and without optional fields',
