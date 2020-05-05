@@ -18,6 +18,6 @@ void main(List<String> args) {
   // debug.useAnsiColors = true;
 
   KryptonClient kryptonClient =
-      KryptonClient.fromString("https://localhost:5000");
+      KryptonClient("https://localhost:5000");
   kryptonClient.register("nicolas@example.com", "1234unsecurepassword");
 }
