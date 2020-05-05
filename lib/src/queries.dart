@@ -6,17 +6,22 @@
 
 enum QueryEnum {
   register,
+  login,
+  delete,
 }
 
-// Require dart >= 2.6.0
+// Requires dart >= 2.6.0
 extension QueryExtension on QueryEnum {
-
   String get value {
     switch (this) {
       case QueryEnum.register:
-      return _register;
+        return _register;
+      case QueryEnum.login:
+        return _login;
+      case QueryEnum.delete:
+        return _delete;
       default:
-      return null;
+        return null;
     }
   }
 }
@@ -24,5 +29,20 @@ extension QueryExtension on QueryEnum {
 const String _register = r'''
   mutation register($fields: UserRegisterInput!) {
     register(fields: $fields)
+  }
+''';
+
+const String _login = r'''
+mutation login($email: String!, $password: String!) {
+  login(email: $email, password: $password) {
+    token
+    expiryDate
+  }
+}
+''';
+
+const String _delete = r'''
+  mutation deleteMe($password: String!) {
+    deleteMe(password: $password)
   }
 ''';

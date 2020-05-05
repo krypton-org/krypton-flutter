@@ -5,29 +5,20 @@
 // MIT license that can be found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:convert';
 import 'package:graphql/client.dart';
 import 'queries.dart';
 
 class KryptonClient {
-  var _endpoint;
-  GraphQLClient _graphQLClient;
-
-  void _init(dynamic endpoint) {
-    this._endpoint = endpoint;
-    this._graphQLClient = _graphQLClientFromEndpoint(endpoint);
-  }
+  Map<String, dynamic> _state;
+  String _endpoint;
 
   /// Public API
 ////////////////////////////////////////////////
-  KryptonClient.fromString(String endpoint) {
-    this._init(endpoint);
+  KryptonClient(String endpoint) {
+    _endpoint = endpoint;
+    _state = Map();
   }
-
-  KryptonClient.fromLink(Link endpoint) {
-    this._init(endpoint);
-  }
-  // If you add more types as a constructor for endpoint here,
-  // be sure to take them into account in _graphQLClientFromEndpoint.
 
   /// For information purpose, we alow the consumer of this library to get the value of endpoint he used to construct this class
   dynamic get endpoint {
@@ -35,39 +26,89 @@ class KryptonClient {
   }
 
   Future<void> register(String email, String password,
-      [Map<String, dynamic> fields]) async {
-    Map<String, dynamic> _variables = {'email': email, 'password': password};
-    if (fields != null) {
-      _variables.addAll(fields);
+      [Map<String, dynamic> newFields]) async {
+    Map<String, dynamic> _variables = {
+      'fields': {'email': email, 'password': password}
+    };
+    if (newFields != null) {
+      _variables['fields'].addAll(newFields);
     }
-    QueryResult queryResult = await _query(QueryEnum.register, _variables);
+    GraphQLClient _graphQLClient = _instanciateGraphQLClient();
+    QueryResult result =
+        await _query(QueryEnum.register, _variables, _graphQLClient);
+    print(result.data);
+  }
+
+  Future<void> login(String email, String password) async {
+    Map<String, dynamic> _variables = {'email': email, 'password': password};
+    GraphQLClient _graphQLClient = _instanciateGraphQLClient();
+    QueryResult result =
+        await _query(QueryEnum.login, _variables, _graphQLClient);
+    if (result.data != null) {
+      _updateState(result.data['login']);
+    }
+    print(result.data);
+  }
+
+  Future<void> delete(String password) async {
+    Map<String, dynamic> _variables = {'password': password};
+    GraphQLClient _graphQLClient =
+        _instanciateGraphQLClient(authTokenRequired: true);
+    QueryResult result =
+        await _query(QueryEnum.delete, _variables, _graphQLClient);
+    print(result.data);
+    _state.clear();
   }
   ///////////////////////////////////////////////////
 
-  GraphQLClient _graphQLClientFromEndpoint(dynamic endpoint) {
-    if (endpoint is String) {
-      final HttpLink _httpLink = HttpLink(
-        uri: endpoint,
-      );
-      return GraphQLClient(
-        cache: InMemoryCache(),
-        link: _httpLink,
-      );
-    } else {
-      // It is a Link
-      return GraphQLClient(
-        cache: InMemoryCache(),
-        link: endpoint,
-      );
+  void _updateState(Map<String, dynamic> dataItemContent) {
+    if (dataItemContent != null) {
+      _state['token'] = dataItemContent['token'];
+      _state['expiryDate'] = dataItemContent['expiryDate'];
+      _state['user'] = _decodeToken(dataItemContent['token']);
     }
   }
 
-  Future<QueryResult> _query(
-      QueryEnum queryEnum, Map<String, dynamic> variables) async {
+  dynamic _decodeToken(String token) {
+    if(token == null) {
+      //TODO: throw unexpected parse exception: user token is null, cannot decode it
+      return null;
+    }
+    final parts = token.split('.');
+    if (parts.length != 3) {
+      //TODO: throw unexpected parse exception: user token is not in the right format: cannot decode it. Are you sure you are connected to Krypton Auth?
+      return null;
+    }
+    final payload = parts[1];
+    var normalized = base64Url.normalize(payload);
+    var resp = utf8.decode(base64Url.decode(normalized));
+    return json.decode(resp);
+  }
+
+  GraphQLClient _instanciateGraphQLClient({bool authTokenRequired = false}) {
+    Link _link = HttpLink(
+      uri: endpoint,
+    );
+    if (authTokenRequired) {
+      final AuthLink _authLink = AuthLink(
+        getToken: () async => "Bearer ${_state['token']}",
+      );
+      _link = _authLink.concat(_link);
+    }
+    return GraphQLClient(
+      cache: InMemoryCache(),
+      link: _link,
+    );
+  }
+
+  Future<QueryResult> _query(QueryEnum queryEnum,
+      Map<String, dynamic> variables, GraphQLClient graphQLClient) async {
     final QueryOptions _options = QueryOptions(
       documentNode: gql(queryEnum.value),
       variables: variables,
     );
-    return await this._graphQLClient.query(_options);
+    //TODO parse exception and throw standard exception and then parse specific errors throw specific exceptions
+    // finally return QueryResult
+    return await graphQLClient.query(_options);
   }
 }
