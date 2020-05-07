@@ -5,9 +5,8 @@
 // MIT license that can be found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:convert';
-import 'package:graphql/client.dart';
 import 'queries.dart';
+import 'package:graphql/client.dart';
 
 class KryptonClient {
   Map<String, dynamic> _state;
@@ -35,7 +34,7 @@ class KryptonClient {
     }
     GraphQLClient _graphQLClient = _instanciateGraphQLClient();
     QueryResult result =
-        await _query(QueryEnum.register, _variables, _graphQLClient);
+        await query(QueryEnum.register, _variables, _graphQLClient);
     print(result.data);
   }
 
@@ -43,7 +42,7 @@ class KryptonClient {
     Map<String, dynamic> _variables = {'email': email, 'password': password};
     GraphQLClient _graphQLClient = _instanciateGraphQLClient();
     QueryResult result =
-        await _query(QueryEnum.login, _variables, _graphQLClient);
+        await query(QueryEnum.login, _variables, _graphQLClient);
     if (result.data != null) {
       _updateState(result.data['login']);
     }
@@ -55,35 +54,11 @@ class KryptonClient {
     GraphQLClient _graphQLClient =
         _instanciateGraphQLClient(authTokenRequired: true);
     QueryResult result =
-        await _query(QueryEnum.delete, _variables, _graphQLClient);
+        await query(QueryEnum.delete, _variables, _graphQLClient);
     print(result.data);
     _state.clear();
   }
   ///////////////////////////////////////////////////
-
-  void _updateState(Map<String, dynamic> dataItemContent) {
-    if (dataItemContent != null) {
-      _state['token'] = dataItemContent['token'];
-      _state['expiryDate'] = dataItemContent['expiryDate'];
-      _state['user'] = _decodeToken(dataItemContent['token']);
-    }
-  }
-
-  dynamic _decodeToken(String token) {
-    if(token == null) {
-      //TODO: throw unexpected parse exception: user token is null, cannot decode it
-      return null;
-    }
-    final parts = token.split('.');
-    if (parts.length != 3) {
-      //TODO: throw unexpected parse exception: user token is not in the right format: cannot decode it. Are you sure you are connected to Krypton Auth?
-      return null;
-    }
-    final payload = parts[1];
-    var normalized = base64Url.normalize(payload);
-    var resp = utf8.decode(base64Url.decode(normalized));
-    return json.decode(resp);
-  }
 
   GraphQLClient _instanciateGraphQLClient({bool authTokenRequired = false}) {
     Link _link = HttpLink(
@@ -101,14 +76,11 @@ class KryptonClient {
     );
   }
 
-  Future<QueryResult> _query(QueryEnum queryEnum,
-      Map<String, dynamic> variables, GraphQLClient graphQLClient) async {
-    final QueryOptions _options = QueryOptions(
-      documentNode: gql(queryEnum.value),
-      variables: variables,
-    );
-    //TODO parse exception and throw standard exception and then parse specific errors throw specific exceptions
-    // finally return QueryResult
-    return await graphQLClient.query(_options);
+  void _updateState(Map<String, dynamic> dataItemContent) {
+    if (dataItemContent != null) {
+      _state['token'] = dataItemContent['token'];
+      _state['expiryDate'] = dataItemContent['expiryDate'];
+      _state['user'] = decodeToken(dataItemContent['token']);
+    }
   }
 }

@@ -6,5 +6,5 @@
 
 library krypton;
 
-export 'src/krypton.dart';
+export 'src/client.dart';
 export 'src/exceptions.dart';
