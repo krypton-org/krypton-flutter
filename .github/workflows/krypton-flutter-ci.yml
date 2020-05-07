@@ -22,9 +22,11 @@ jobs:
     - uses: actions/checkout@v2
     - name: Install dependencies
       run: pub get
-    - name: Start docker instances
-      run: ./tool/start-krypton-auth.sh 
+    - name: Start MongoDB instance for testing purposes
+      run: docker run --detach --name krypton-auth-db-test --network krypton-auth-net-test mongo
+    - name: Start Krypton Auth middleware for testing purposes
+      run: docker run --detach --name krypton-auth-test --network krypton-auth-net-test --env MONGODB_URI="mongodb://krypton-auth-db-test:27017/users" --publish 5000:5000 kryptonorg/krypton-auth
     - name: Run tests
       run: pub run test
     - name: Cleanup
-      run: ./tool/stop-krypton-auth.sh
+      run: 
