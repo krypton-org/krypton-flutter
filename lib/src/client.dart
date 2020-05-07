@@ -35,7 +35,6 @@ class KryptonClient {
     GraphQLClient _graphQLClient = _instanciateGraphQLClient();
     QueryResult result =
         await query(QueryEnum.register, _variables, _graphQLClient);
-    print(result.data);
   }
 
   Future<void> login(String email, String password) async {
@@ -46,7 +45,6 @@ class KryptonClient {
     if (result.data != null) {
       _updateState(result.data['login']);
     }
-    print(result.data);
   }
 
   Future<void> delete(String password) async {
@@ -55,7 +53,6 @@ class KryptonClient {
         _instanciateGraphQLClient(authTokenRequired: true);
     QueryResult result =
         await query(QueryEnum.delete, _variables, _graphQLClient);
-    print(result.data);
     _state.clear();
   }
 

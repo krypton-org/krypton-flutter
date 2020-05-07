@@ -44,7 +44,6 @@ void main() {
         () async {
       await kryptonClient.register(email, password);
       await kryptonClient.login(email, password);
-      print(kryptonClient.user);
       expect(kryptonClient.user, isNot(null));
     });
 
