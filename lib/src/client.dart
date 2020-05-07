@@ -58,6 +58,10 @@ class KryptonClient {
     print(result.data);
     _state.clear();
   }
+
+  dynamic get user {
+    return _state['user'];
+  }
   ///////////////////////////////////////////////////
 
   GraphQLClient _instanciateGraphQLClient({bool authTokenRequired = false}) {
