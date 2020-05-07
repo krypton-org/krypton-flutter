@@ -5,12 +5,14 @@ services:
 
 
 before_script:
+  - docker network create krypton-auth-net-test
   - docker run --detach --name krypton-auth-db-test --network krypton-auth-net-test mongo
   - docker run --detach --name krypton-auth-test --network krypton-auth-net-test --env MONGODB_URI="mongodb://krypton-auth-db-test:27017/users" --publish 5000:5000 kryptonorg/krypton-auth
 
 after_script:
   - docker rm -f docker rm -f krypton-auth-test
   - docker rm -f krypton-auth-db-test
+  - docker network rm krypton-auth-net-test
 
 dart:
 # Install the latest stable release
@@ -20,5 +22,5 @@ dart_task:
   - dartfmt
 
 # Only building master means that we don't run two builds for each pull request.
-branches:
-  only: [master]
+# branches:
+#  only: [master]
