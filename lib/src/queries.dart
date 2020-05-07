@@ -8,7 +8,7 @@ import 'dart:convert';
 import 'package:graphql/client.dart';
 
 dynamic decodeToken(String token) {
-  if(token == null) {
+  if (token == null) {
     //TODO: throw unexpected parse exception: user token is null, cannot decode it
     return null;
   }
@@ -23,9 +23,8 @@ dynamic decodeToken(String token) {
   return json.decode(resp);
 }
 
-
-Future<QueryResult> query(QueryEnum queryEnum,
-    Map<String, dynamic> variables, GraphQLClient graphQLClient) async {
+Future<QueryResult> query(QueryEnum queryEnum, Map<String, dynamic> variables,
+    GraphQLClient graphQLClient) async {
   final QueryOptions _options = QueryOptions(
     documentNode: gql(queryEnum.value),
     variables: variables,
@@ -34,7 +33,6 @@ Future<QueryResult> query(QueryEnum queryEnum,
   // finally return QueryResult
   return await graphQLClient.query(_options);
 }
-
 
 enum QueryEnum {
   register,

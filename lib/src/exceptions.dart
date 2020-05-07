@@ -6,9 +6,6 @@
 
 library krypton.src.exceptions;
 
-class KryptonException implements Exception {
-}
+class KryptonException implements Exception {}
 
-class AlreadyLoggedInException extends KryptonException {
- 
-}
+class AlreadyLoggedInException extends KryptonException {}

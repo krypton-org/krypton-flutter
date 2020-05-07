@@ -17,7 +17,6 @@ void main(List<String> args) {
   // debug.traceSplitter = true;
   // debug.useAnsiColors = true;
 
-  KryptonClient kryptonClient =
-      KryptonClient("https://localhost:5000");
+  KryptonClient kryptonClient = KryptonClient("https://localhost:5000");
   kryptonClient.register("nicolas@example.com", "1234unsecurepassword");
 }
