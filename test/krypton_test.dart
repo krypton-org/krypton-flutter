@@ -10,12 +10,94 @@ import 'package:krypton/krypton.dart';
 import 'package:test/test.dart';
 
 void main() {
-  final _kryptonClient = KryptonClient.fromString("http://localhost:5000");
+  group("Register tests", () {
+    KryptonClient kryptonClient;
+    final email = "john.doe@example.com";
+    final password = 'iAmavalidPassw0rd';
+    setUp(() {
+      kryptonClient = KryptonClient("http://localhost:5000");
+    });
 
-  /// This test should not throw any exception
-  test('register a user with basic email password and without optional fields',
-      () async {
-      await _kryptonClient.register(
-          'john.doe@example.com', 'iAmavalidPassw0rd');
+    /// This test should not throw any exception
+    test(
+        'register a user with basic email password and without optional fields',
+        () async {
+      await kryptonClient.register(email, password);
+    });
+
+    tearDown(() async {
+      await kryptonClient.delete(password);
+    });
+  });
+
+  group("get user tests", () {
+    KryptonClient kryptonClient;
+    final email = "john.doe@example.com";
+    final password = 'iAmavalidPassw0rd';
+    setUp(() {
+      kryptonClient = KryptonClient("http://localhost:5000");
+    });
+
+    /// This test should not throw any exception
+    test(
+        'register a user with basic email password and without optional fields and get user',
+        () async {
+      await kryptonClient.register(email, password);
+      await kryptonClient.login(email, password);
+      expect(kryptonClient.user, isNot(null));
+    });
+
+    tearDown(() async {
+      await kryptonClient.delete(password);
+    });
+  });
+
+  group("Login tests", () {
+    KryptonClient kryptonClient;
+    final email = "john.doe@example.com";
+    final password = 'iAmavalidPassw0rd';
+    setUp(() {
+      kryptonClient = KryptonClient("http://localhost:5000");
+    });
+
+    test(
+        'login without register first, should fail with Exception UserNotFound',
+        () async {
+      // try {
+      await kryptonClient.login(email, password);
+
+      // } on LoginException catch (err) {
+      //   var message = err.message();
+      //   expect(message, contains('Could not login'));
+      // }
+      //TODO after adding excetions, test them
+    });
+    test('login after register should succeed', () async {
+      await kryptonClient.register(email, password);
+      await kryptonClient.login(email, password);
+    });
+    tearDown(() async {
+      await kryptonClient.delete(password);
+    });
+  });
+
+  group("Delete tests", () {
+    KryptonClient kryptonClient;
+    final email = "john.doe@example.com";
+    final password = 'iAmavalidPassw0rd';
+    setUp(() {
+      kryptonClient = KryptonClient("http://localhost:5000");
+    });
+
+    test('delete existing user, should succeed', () async {
+      // try {
+      await kryptonClient.register(email, password);
+      await kryptonClient.login(email, password);
+      await kryptonClient.delete(password);
+    });
+
+    tearDown(() async {
+      await kryptonClient.delete(password);
+    });
   });
 }

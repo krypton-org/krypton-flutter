@@ -4,7 +4,8 @@
 // All rights reserved. Use of this source code is governed by the
 // MIT license that can be found in the LICENSE file.
 
-library krypton;
+library krypton.src.exceptions;
 
-export 'src/client.dart';
-export 'src/exceptions.dart';
+class KryptonException implements Exception {}
+
+class AlreadyLoggedInException extends KryptonException {}
