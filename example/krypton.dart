@@ -14,7 +14,7 @@ void main(List<String> args) async {
   try {
     await kryptonClient.register("nicolas@example.com", "1234unsecurepassword");
     await kryptonClient.login("nicolas@example.com", "1234unsecurepassword");
-  } catch(err) {
+  } catch (err) {
     print(err);
   }
 }
