@@ -77,3 +77,4 @@ TODO
 
 This project is licensed under the [MIT License](LICENSE).
 No copyright assignment is necessary to contribute, so copyrights are shared among contributors.
+This project relies third-party packages licensed under various OSI-approved MIT-like licenses - visit [THIRD-PARTY](THIRD-PARTY.md) for details.
