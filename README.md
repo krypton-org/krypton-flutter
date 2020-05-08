@@ -27,14 +27,12 @@ import 'package:krypton/krypton.dart';
 #### Basic example
 
 ```dart
-void main(List<String> args) async {
   KryptonClient kryptonClient = KryptonClient("https://localhost:5000"); // assuming Krypton Auth's MongoDB instance is running on this URL
   try {
     await kryptonClient.register("nicolas@example.com", "1234unsecurepassword");
     await kryptonClient.login("nicolas@example.com", "1234unsecurepassword");
   } catch(err) {
     print(err);
-  }
 ```
 
 #### Advanced example
