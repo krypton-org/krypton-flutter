@@ -26,7 +26,13 @@ import 'package:krypton/krypton.dart';
 
 #### Basic example
 
-TODO
+```dart
+void main(List<String> args) {
+  KryptonClient kryptonClient = KryptonClient("https://localhost:5000");
+  try {
+    await kryptonClient.register("nicolas@example.com", "1234unsecurepassword");
+  }
+```
 
 #### Advanced example
 
