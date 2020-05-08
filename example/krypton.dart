@@ -9,14 +9,12 @@ library krypton.example.krypton;
 import 'package:krypton/krypton.dart';
 // import 'package:dart_style/src/debug.dart' as debug;
 
-void main(List<String> args) {
-  // Enable debugging so you can see some of the formatter's internal state.
-  // Normal users do not do this.
-  // debug.traceChunkBuilder = true;
-  // debug.traceLineWriter = true;
-  // debug.traceSplitter = true;
-  // debug.useAnsiColors = true;
-
+void main(List<String> args) async {
   KryptonClient kryptonClient = KryptonClient("https://localhost:5000");
-  kryptonClient.register("nicolas@example.com", "1234unsecurepassword");
+  try {
+    await kryptonClient.register("nicolas@example.com", "1234unsecurepassword");
+    await kryptonClient.login("nicolas@example.com", "1234unsecurepassword");
+  } catch(err) {
+    print(err);
+  }
 }
