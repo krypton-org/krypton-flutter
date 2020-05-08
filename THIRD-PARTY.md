@@ -1,6 +1,6 @@
 ## Credits to third-party packages
 
-All the external librairies used in this package are listed in this document.
+All the external packages used by this repository are listed in this document.
 
 ### GraphQL 
 
