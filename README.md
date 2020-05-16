@@ -1,6 +1,12 @@
-# Krypton Flutter Client
-
-[![Build Status](https://travis-ci.com/krypton-org/krypton-flutter.svg?branch=master)](https://travis-ci.com/krypton-org/krypton-flutter)
+<p align="center">
+  <img src="https://github.com/krypton-org/krypton-auth/raw/master/img/logo.png" width="150px"/>
+</p>
+<p align="center">
+  <i> Krypton client for Flutter and Dart.</i><br/><br/>
+  <a href="https://travis-ci.com/krypton-org/krypton-flutter">
+    <img src="https://travis-ci.com/krypton-org/krypton-flutter.svg?branch=master">
+  </a>
+</p>
 
 This is the Dart library to connect to [Krypton Authentification server](https://github.com/krypton-org/krypton-auth).
 It is based on the [Krypton client specification](https://github.com/krypton-org/krypton-drafts/tree/master/client).
