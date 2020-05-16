@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://github.com/krypton-org/krypton-auth/raw/master/img/logo.png" width="150px"/>
+  <img src="https://github.com/krypton-org/krypton-flutter/raw/master/img/logo.png" width="150px"/>
 </p>
 <p align="center">
   <i> Krypton client for Flutter and Dart.</i><br/><br/>
