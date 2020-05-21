@@ -7,4 +7,5 @@ environment:
   sdk: '>=2.6.0 <3.0.0'
 dependencies:
   graphql: ^3.0.0
+dev_dependencies:
   test: ^1.6.0

@@ -38,6 +38,7 @@ enum QueryEnum {
   register,
   login,
   delete,
+  refresh,
 }
 
 // Requires dart >= 2.6.0
@@ -50,6 +51,8 @@ extension QueryExtension on QueryEnum {
         return _login;
       case QueryEnum.delete:
         return _delete;
+      case QueryEnum.refresh:
+        return _refresh;
       default:
         return null;
     }
@@ -75,4 +78,8 @@ const String _delete = r'''
   mutation deleteMe($password: String!) {
     deleteMe(password: $password)
   }
+''';
+
+const String _refresh = r'''
+  mutation { refreshToken { token, expiryDate } }
 ''';

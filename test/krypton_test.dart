@@ -45,6 +45,8 @@ void main() {
       await kryptonClient.register(email, password);
       await kryptonClient.login(email, password);
       expect(kryptonClient.user, isNot(null));
+      expect(kryptonClient.user['email'], email);
+      expect(kryptonClient.expiryDate.isAfter(new DateTime.now()), true);
     });
 
     tearDown(() async {
