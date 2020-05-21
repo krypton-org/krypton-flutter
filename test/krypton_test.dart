@@ -26,7 +26,7 @@ void main() {
     });
 
     tearDown(() async {
-      try{
+      try {
         await kryptonClient.login(email, password);
         await kryptonClient.delete(password);
       } catch (err) {}
@@ -57,7 +57,7 @@ void main() {
     });
 
     tearDown(() async {
-      try{
+      try {
         await kryptonClient.login(email, password);
         await kryptonClient.delete(password);
       } catch (err) {}
@@ -87,7 +87,7 @@ void main() {
       await kryptonClient.login(email, password);
     });
     tearDown(() async {
-      try{
+      try {
         await kryptonClient.login(email, password);
         await kryptonClient.delete(password);
       } catch (err) {}
@@ -109,7 +109,7 @@ void main() {
     });
 
     tearDown(() async {
-      try{
+      try {
         await kryptonClient.login(email, password);
         await kryptonClient.delete(password);
       } catch (err) {}

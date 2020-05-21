@@ -19,7 +19,8 @@ class KryptonClient {
 
   /// Public API
   ////////////////////////////////////////////////
-  KryptonClient(this.endpoint, {this.minTimeToLive = DEFAULT_MIN_TIME_TO_LIVE}) {
+  KryptonClient(this.endpoint,
+      {this.minTimeToLive = DEFAULT_MIN_TIME_TO_LIVE}) {
     _state = new _KryptonState();
   }
 

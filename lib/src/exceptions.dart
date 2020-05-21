@@ -7,7 +7,7 @@
 library krypton.src.exceptions;
 
 /// A Krypton exception.
-class KryptonException implements Exception { }
+class KryptonException implements Exception {}
 
 /// Email already exists in the database.
 class EmailAlreadyExistsException extends KryptonException {}
