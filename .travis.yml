@@ -20,6 +20,7 @@ dart:
 
 dart_task:
   - dartfmt
+  - pub run test
 
 # Only building master means that we don't run two builds for each pull request.
 branches:
