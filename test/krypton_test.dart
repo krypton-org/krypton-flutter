@@ -12,7 +12,7 @@ import 'package:test/test.dart';
 void main() {
   group("Register tests", () {
     KryptonClient kryptonClient;
-    final email = "john.doe@example.com";
+    final email = "register@example.com";
     final password = 'iAmavalidPassw0rd';
     setUp(() {
       kryptonClient = KryptonClient("http://localhost:5000");
@@ -26,14 +26,16 @@ void main() {
     });
 
     tearDown(() async {
-      await kryptonClient.login(email, password);
-      await kryptonClient.delete(password);
+      try{
+        await kryptonClient.login(email, password);
+        await kryptonClient.delete(password);
+      } catch (err) {}
     });
   });
 
   group("get user tests", () {
     KryptonClient kryptonClient;
-    final email = "john.doe@example.com";
+    final email = "get.user@example.com";
     final password = 'iAmavalidPassw0rd';
     setUp(() {
       kryptonClient = KryptonClient("http://localhost:5000");
@@ -55,14 +57,16 @@ void main() {
     });
 
     tearDown(() async {
-      await kryptonClient.login(email, password);
-      await kryptonClient.delete(password);
+      try{
+        await kryptonClient.login(email, password);
+        await kryptonClient.delete(password);
+      } catch (err) {}
     });
   });
 
   group("Login tests", () {
     KryptonClient kryptonClient;
-    final email = "john.doe@example.com";
+    final email = "login@example.com";
     final password = 'iAmavalidPassw0rd';
     setUp(() {
       kryptonClient = KryptonClient("http://localhost:5000");
@@ -77,15 +81,16 @@ void main() {
       } catch (e) {
         expect(e, isA<UserNotFoundException>());
       }
-
     });
     test('login after register should succeed', () async {
       await kryptonClient.register(email, password);
       await kryptonClient.login(email, password);
     });
     tearDown(() async {
-      await kryptonClient.login(email, password);
-      await kryptonClient.delete(password);
+      try{
+        await kryptonClient.login(email, password);
+        await kryptonClient.delete(password);
+      } catch (err) {}
     });
   });
 
@@ -104,8 +109,10 @@ void main() {
     });
 
     tearDown(() async {
-      await kryptonClient.login(email, password);
-      await kryptonClient.delete(password);
+      try{
+        await kryptonClient.login(email, password);
+        await kryptonClient.delete(password);
+      } catch (err) {}
     });
   });
 }
