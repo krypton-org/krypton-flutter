@@ -78,6 +78,12 @@ class KryptonClient {
     return _state.user;
   }
 
+  Future<Map<String, dynamic>> logout() async {
+    GraphQLClient _graphQLClient = _instanciateGraphQLClient(authTokenRequired: true);
+    await query(QueryEnum.logout, {}, _graphQLClient);
+    return _state.user;
+  }
+
   Future<void> delete(String password) async {
     Map<String, dynamic> _variables = {'password': password};
     GraphQLClient _graphQLClient =

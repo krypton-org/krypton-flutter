@@ -9,6 +9,7 @@ enum QueryEnum {
   login,
   delete,
   refresh,
+  logout
 }
 
 // Requires dart >= 2.6.0
@@ -23,6 +24,8 @@ extension QueryExtension on QueryEnum {
         return _delete;
       case QueryEnum.refresh:
         return _refresh;
+        case QueryEnum.logout:
+        return _logout;
       default:
         return null;
     }
@@ -41,6 +44,12 @@ mutation login($email: String!, $password: String!) {
     token
     expiryDate
   }
+}
+''';
+
+const String _logout = r'''
+mutation{
+  logout
 }
 ''';
 
