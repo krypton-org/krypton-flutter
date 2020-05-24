@@ -4,13 +4,7 @@
 // All rights reserved. Use of this source code is governed by the
 // MIT license that can be found in the LICENSE file.
 
-enum QueryEnum {
-  register,
-  login,
-  delete,
-  refresh,
-  logout
-}
+enum QueryEnum { register, login, delete, refresh, logout }
 
 // Requires dart >= 2.6.0
 extension QueryExtension on QueryEnum {
@@ -24,7 +18,7 @@ extension QueryExtension on QueryEnum {
         return _delete;
       case QueryEnum.refresh:
         return _refresh;
-        case QueryEnum.logout:
+      case QueryEnum.logout:
         return _logout;
       default:
         return null;

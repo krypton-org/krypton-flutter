@@ -94,35 +94,32 @@ void main() {
     });
 
     group("Log out", () {
-    KryptonClient kryptonClient;
-    final email = "logout.user@example.com";
-    final password = 'iAmavalidPassw0rd';
-    setUp(() {
-      kryptonClient = KryptonClient("http://localhost:5000");
-    });
+      KryptonClient kryptonClient;
+      final email = "logout.user@example.com";
+      final password = 'iAmavalidPassw0rd';
+      setUp(() {
+        kryptonClient = KryptonClient("http://localhost:5000");
+      });
 
-    /// This test should not throw any exception
-    test(
-        'Log out',
-        () async {
-      await kryptonClient.register(email, password);
-      await kryptonClient.login(email, password);
-      try {
-        await kryptonClient.logout();
-        fail("exception not thrown");
-      } catch (e) {
-        expect(e, isA<UnauthorizedException>());
-      }
-    });
-
-    tearDown(() async {
-      try {
+      /// This test should not throw any exception
+      test('Log out', () async {
+        await kryptonClient.register(email, password);
         await kryptonClient.login(email, password);
-        await kryptonClient.delete(password);
-      } catch (err) {}
+        try {
+          await kryptonClient.logout();
+          fail("exception not thrown");
+        } catch (e) {
+          expect(e, isA<UnauthorizedException>());
+        }
+      });
+
+      tearDown(() async {
+        try {
+          await kryptonClient.login(email, password);
+          await kryptonClient.delete(password);
+        } catch (err) {}
+      });
     });
-  });
-    
   });
 
   group("Delete tests", () {
