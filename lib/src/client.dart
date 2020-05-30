@@ -92,7 +92,8 @@ class KryptonClient {
   }
 
   Future<Map<String, dynamic>> login(String email, String password) async {
-    await this._query(new LoginQuery({'email': email, 'password': password}), false);
+    await this
+        ._query(new LoginQuery({'email': email, 'password': password}), false);
     return this._state.user;
   }
 
@@ -138,23 +139,24 @@ class KryptonClient {
 
   Future<Map<String, dynamic>> fetchUserOne(
       Map<String, dynamic> filter, List<String> requestedFields) async {
-    Map<String, dynamic> data =
-        await this._query(new UserOneQuery({'filter': filter}, requestedFields), true);
+    Map<String, dynamic> data = await this
+        ._query(new UserOneQuery({'filter': filter}, requestedFields), true);
     return data['userOne'];
   }
 
   Future<List<Map<String, dynamic>>> fetchUserByIds(
       List<String> ids, List<String> requestedFields) async {
-    Map<String, dynamic> data =
-        await this._query(new UserByIdsQuery({'ids': ids}, requestedFields), true);
+    Map<String, dynamic> data = await this
+        ._query(new UserByIdsQuery({'ids': ids}, requestedFields), true);
     return data['userByIds'];
   }
 
   Future<List<Map<String, dynamic>>> fetchUserMany(
       Map<String, dynamic> filter, List<String> requestedFields,
       [int limit]) async {
-    Map<String, dynamic> data = await this
-        ._query(new UserManyQuery({'filter': filter, 'limit': limit}, requestedFields), true);
+    Map<String, dynamic> data = await this._query(
+        new UserManyQuery({'filter': filter, 'limit': limit}, requestedFields),
+        true);
     return data['userMany'];
   }
 
@@ -171,7 +173,9 @@ class KryptonClient {
   Future<Pagination> fetchUserWithPagination(Map<String, dynamic> filter,
       List<String> requestedFields, int page, int perPage) async {
     Map<String, dynamic> data = await this._query(
-        new UserPaginationQuery({'filter': filter, 'page': page, 'perPage': perPage}, requestedFields),
+        new UserPaginationQuery(
+            {'filter': filter, 'page': page, 'perPage': perPage},
+            requestedFields),
         true);
     return Pagination.fromJson(data['userPagination']);
   }
@@ -181,7 +185,8 @@ class KryptonClient {
     return data['publicKey'];
   }
 
-  Future<Map<String, dynamic>> _query(Query query, bool isAuthTokenRequired) async {
+  Future<Map<String, dynamic>> _query(
+      Query query, bool isAuthTokenRequired) async {
     var headers = {
       Headers.contentTypeHeader: 'application/json',
     };
