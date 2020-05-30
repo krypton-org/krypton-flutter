@@ -6,6 +6,8 @@ homepage: https://github.com/krypton-org/krypton-flutter
 environment:
   sdk: '>=2.6.0 <3.0.0'
 dependencies:
-  graphql: ^3.0.0
+  dio: ^3.0.9
+  dio_cookie_manager: ^1.0.0
+  cookie_jar: ^1.0.1
 dev_dependencies:
   test: ^1.6.0

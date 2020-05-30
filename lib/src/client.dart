@@ -5,10 +5,14 @@
 // MIT license that can be found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:io';
+import 'package:cookie_jar/cookie_jar.dart';
+import 'package:dio/dio.dart';
+import 'package:dio_cookie_manager/dio_cookie_manager.dart';
 import 'package:krypton/src/exceptions.dart';
 import 'dart:convert';
+import 'data/pagination.dart';
 import 'queries.dart';
-import 'package:graphql/client.dart';
 
 const int DEFAULT_MIN_TIME_TO_LIVE = 30 * 1000; // 30 seconds
 
@@ -16,13 +20,34 @@ class KryptonClient {
   _KryptonState _state;
   String endpoint;
   int minTimeToLive;
+  Dio _dio;
+  CookieJar _cookieJar;
 
-  /// Public API
-  ////////////////////////////////////////////////
   KryptonClient(this.endpoint,
-      {this.minTimeToLive = DEFAULT_MIN_TIME_TO_LIVE}) {
+      { sessionID = null,
+        this.minTimeToLive = DEFAULT_MIN_TIME_TO_LIVE}) {
     _state = new _KryptonState();
+    _dio = new Dio();
+    _cookieJar = CookieJar();
+    _dio.interceptors.add(CookieManager(_cookieJar));
   }
+
+  Future<void> initSessionId(String sessionId) async {
+    List<Cookie> cookies = [new Cookie('refreshToken', sessionId)];
+    _cookieJar.saveFromResponse(Uri.parse(endpoint), cookies);
+    await refreshToken();
+  }
+
+  String getSessionId(String refreshToken){
+      List<Cookie> results = _cookieJar.loadForRequest(Uri.parse(endpoint));
+      for (Cookie cookie in results) {
+        if(cookie.name == 'refreshToken'){
+          return cookie.value;
+        }
+      }
+      return '';
+  }
+
 
   DateTime get expiryDate => _state.expiryDate;
 
@@ -41,8 +66,7 @@ class KryptonClient {
   }
 
   Future<void> refreshToken() async {
-    GraphQLClient _graphQLClient = _instanciateGraphQLClient();
-    await query(QueryEnum.refresh, null, _graphQLClient);
+    await this._query(new RefreshQuery(), false);
   }
 
   Future<bool> isLoggedIn() async {
@@ -61,135 +85,173 @@ class KryptonClient {
 
   Future<void> register(String email, String password,
       [Map<String, dynamic> newFields]) async {
-    Map<String, dynamic> _variables = {
-      'fields': {'email': email, 'password': password}
-    };
-    if (newFields != null) {
-      _variables['fields'].addAll(newFields);
-    }
-    GraphQLClient _graphQLClient = _instanciateGraphQLClient();
-    await query(QueryEnum.register, _variables, _graphQLClient);
+    await this._query(
+        new RegisterQuery({
+          'fields': {'email': email, 'password': password, ...newFields}
+        }),
+        false);
   }
 
   Future<Map<String, dynamic>> login(String email, String password) async {
-    Map<String, dynamic> _variables = {'email': email, 'password': password};
-    GraphQLClient _graphQLClient = _instanciateGraphQLClient();
-    await query(QueryEnum.login, _variables, _graphQLClient);
-    return _state.user;
+    await this._query(new LoginQuery({email, password}), false);
+    return this._state.user;
   }
 
-  Future<Map<String, dynamic>> logout() async {
-    GraphQLClient _graphQLClient =
-        _instanciateGraphQLClient(authTokenRequired: true);
-    await query(QueryEnum.logout, {}, _graphQLClient);
-    return _state.user;
-  }
-
-  Future<void> delete(String password) async {
-    Map<String, dynamic> _variables = {'password': password};
-    GraphQLClient _graphQLClient =
-        _instanciateGraphQLClient(authTokenRequired: true);
-    await query(QueryEnum.delete, _variables, _graphQLClient);
+  Future<void> logout() async {
+    await this._query(new LogoutQuery(), true);
     _state = new _KryptonState();
   }
 
-  ///////////////////////////////////////////////////
-
-  GraphQLClient _instanciateGraphQLClient({bool authTokenRequired = false}) {
-    Link _link = HttpLink(
-      uri: endpoint,
-    );
-    if (authTokenRequired) {
-      final AuthLink _authLink = AuthLink(
-        getToken: getAuthorizationHeader,
-      );
-      _link = _authLink.concat(_link);
-    }
-    return GraphQLClient(
-      cache: InMemoryCache(),
-      link: _link,
-    );
+  Future<Map<String, dynamic>> update(Map<String, dynamic> fields) async {
+    await this._query(new UpdateQuery({fields}), true);
+    return this._state.user;
   }
 
-  dynamic decodeToken(String token) {
-    if (token == null) {
-      //TODO: throw unexpected parse exception: user token is null, cannot decode it
-      return null;
+  Future<void> delete(String password) async {
+    await this._query(new DeleteQuery({password}), true);
+    _state = new _KryptonState();
+  }
+
+  Future<void> recoverPassword(String email) async {
+    await this._query(new SendPasswordRecoveryQuery({email}), true);
+  }
+
+  Future<bool> isEmailAvailable(String email) async {
+    Map<String, dynamic> data =
+        await this._query(new EmailAvailableQuery({email}), false);
+    return data['emailAvailable'];
+  }
+
+  Future<void> changePassword(String actualPassword, String newPassword) async {
+    await this._query(
+        new UpdateQuery({
+          'fields': {
+            'password': newPassword,
+            'previousPassword': actualPassword
+          }
+        }),
+        true);
+  }
+
+  Future<void> sendVerificationEmail() async {
+    await this._query(new SendVerificationEmailQuery(), true);
+  }
+
+  Future<Map<String, dynamic>> fetchUserOne(
+      Map<String, dynamic> filter, List<String> requestedFields) async {
+    Map<String, dynamic> data =
+        await this._query(new UserOneQuery({filter}, requestedFields), true);
+    return data['userOne'];
+  }
+
+  Future<List<Map<String, dynamic>>> fetchUserByIds(
+      List<String> ids, List<String> requestedFields) async {
+    Map<String, dynamic> data =
+        await this._query(new UserByIdsQuery({ids}, requestedFields), true);
+    return data['userByIds'];
+  }
+
+  Future<List<Map<String, dynamic>>> fetchUserMany(
+      Map<String, dynamic> filter, List<String> requestedFields,
+      [int limit]) async {
+    Map<String, dynamic> data = await this
+        ._query(new UserManyQuery({filter, limit}, requestedFields), true);
+    return data['userMany'];
+  }
+
+  Future<int> fetchUserCount([Map<String, dynamic> filter]) async {
+    Map<String, dynamic> variables = {};
+    if (filter != null) {
+      variables['filter'] = filter;
     }
+    Map<String, dynamic> data =
+        await this._query(new UserCountQuery(variables), true);
+    return data['userCount'];
+  }
+
+  Future<Pagination> fetchUserWithPagination(Map<String, dynamic> filter,
+      List<String> requestedFields, int page, int perPage) async {
+    Map<String, dynamic> data = await this._query(
+        new UserPaginationQuery({filter, page, perPage}, requestedFields),
+        true);
+    return Pagination.fromJson(data['userPagination']);
+  }
+
+  Future<String> fetchPublicKey() async {
+    Map<String, dynamic> data = await this._query(new PublicKeyQuery(), true);
+    return data['publicKey'];
+  }
+
+  Future<dynamic> _query(Query query, bool isAuthTokenRequired) async {
+    var headers = {
+      Headers.contentTypeHeader: 'application/json',
+    };
+
+    if (isAuthTokenRequired) {
+      headers['Authorization'] = await this.getAuthorizationHeader();
+    }
+
+    Response response = await _dio.post(endpoint,
+        data: query.toJson(), options: Options(headers: headers));
+    if (response.data['errors'] != null) {
+      throw _parseKryptonException(response.data['errors']);
+    }
+    if (response.data.data != null) {
+      _updateAuthData(response.data.data);
+    }
+    return response.data.data;
+  }
+
+  Exception _parseKryptonException(List<Map<String, dynamic>> errors) {
+    String errorType = errors[0]['type'];
+    String message = errors[0]['message'];
+    switch (errorType) {
+      case "AlreadyLoggedInError":
+        return new AlreadyLoggedInException(message);
+      case "EmailAlreadyConfirmedError":
+        return new EmailAlreadyConfirmedException(message);
+      case "EmailAlreadyExistsError":
+        return new EmailAlreadyExistsException(message);
+      case "EmailNotSentError":
+        return new EmailNotSentException(message);
+      case "UpdatePasswordTooLateError":
+        return new UpdatePasswordTooLateException(message);
+      case "UnauthorizedError":
+        return new UnauthorizedException(message);
+      case "UserNotFoundError":
+        return new UserNotFoundException(message);
+      case "UserValidationError":
+        return new UserValidationException(message);
+      case "WrongPasswordError":
+        return new WrongPasswordException(message);
+      default:
+        return new KryptonException(message);
+    }
+  }
+
+  void _updateAuthData(Map<String, dynamic> data) {
+    if (data['login'] != null) {
+      _setState(data['login']);
+    } else if (data['refreshToken'] != null) {
+      _setState(data['refreshToken']);
+    } else if (data['updateMe'] != null) {
+      _setState(data['updateMe']);
+    }
+  }
+
+  Map<String, dynamic> _decodeToken(String token) {
     final parts = token.split('.');
-    if (parts.length != 3) {
-      //TODO: throw unexpected parse exception: user token is not in the right format: cannot decode it. Are you sure you are connected to Krypton Auth?
-      return null;
-    }
     final payload = parts[1];
     var normalized = base64Url.normalize(payload);
     var resp = utf8.decode(base64Url.decode(normalized));
     return json.decode(resp);
   }
 
-  Future<dynamic> query(QueryEnum queryEnum, Map<String, dynamic> variables,
-      GraphQLClient graphQLClient) async {
-    final QueryOptions _options = QueryOptions(
-      documentNode: gql(queryEnum.value),
-      variables: variables,
-    );
-    QueryResult result = await graphQLClient.query(_options);
-    if (result.exception != null) {
-      throw _convertToKryptonException(result.exception);
-    }
-    if (result.data != null) {
-      _updateAuthData(result.data);
-    }
-    return result.data;
-  }
-
-  void _updateState(Map<String, dynamic> dataItemContent) {
+  void _setState(Map<String, dynamic> dataItemContent) {
     _state = new _KryptonState(
         token: dataItemContent['token'],
         expiryDate: DateTime.parse(dataItemContent['expiryDate']),
-        user: decodeToken(dataItemContent['token']));
-  }
-
-  Exception _convertToKryptonException(OperationException exception) {
-    if (exception.graphqlErrors != null &&
-        exception.graphqlErrors.length > 0 &&
-        exception.graphqlErrors[0].raw['type'] != null) {
-      String type = exception.graphqlErrors[0].raw['type'];
-      switch (type) {
-        case "AlreadyLoggedInError":
-          return new AlreadyLoggedInException();
-        case "EmailAlreadyConfirmedError":
-          return new EmailAlreadyConfirmedException();
-        case "EmailAlreadyExistsError":
-          return new EmailAlreadyExistsException();
-        case "EmailNotSentError":
-          return new EmailNotSentException();
-        case "UpdatePasswordTooLateError":
-          return new UpdatePasswordTooLateException();
-        case "UnauthorizedError":
-          return new UnauthorizedException();
-        case "UserNotFoundError":
-          return new UserNotFoundException();
-        case "UserValidationError":
-          return new UserValidationException();
-        case "WrongPasswordError":
-          return new WrongPasswordException();
-        default:
-          return new KryptonException();
-      }
-    } else {
-      return exception;
-    }
-  }
-
-  void _updateAuthData(Map<String, dynamic> data) {
-    if (data['login'] != null) {
-      _updateState(data['login']);
-    } else if (data['refreshToken'] != null) {
-      _updateState(data['refreshToken']);
-    } else if (data['updateMe'] != null) {
-      _updateState(data['updateMe']);
-    }
+        user: _decodeToken(dataItemContent['token']));
   }
 }
 
