@@ -105,8 +105,9 @@ void main() {
       test('Log out', () async {
         await kryptonClient.register(email, password);
         await kryptonClient.login(email, password);
+        await kryptonClient.logout();
         try {
-          await kryptonClient.logout();
+          await kryptonClient.refreshToken();
           fail("exception not thrown");
         } catch (e) {
           expect(e, isA<UnauthorizedException>());
