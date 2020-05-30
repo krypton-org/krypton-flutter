@@ -24,8 +24,7 @@ class KryptonClient {
   CookieJar _cookieJar;
 
   KryptonClient(this.endpoint,
-      { sessionID = null,
-        this.minTimeToLive = DEFAULT_MIN_TIME_TO_LIVE}) {
+      {sessionID = null, this.minTimeToLive = DEFAULT_MIN_TIME_TO_LIVE}) {
     _state = new _KryptonState();
     _dio = new Dio();
     _cookieJar = CookieJar();
@@ -38,16 +37,15 @@ class KryptonClient {
     await refreshToken();
   }
 
-  String getSessionId(String refreshToken){
-      List<Cookie> results = _cookieJar.loadForRequest(Uri.parse(endpoint));
-      for (Cookie cookie in results) {
-        if(cookie.name == 'refreshToken'){
-          return cookie.value;
-        }
+  String getSessionId(String refreshToken) {
+    List<Cookie> results = _cookieJar.loadForRequest(Uri.parse(endpoint));
+    for (Cookie cookie in results) {
+      if (cookie.name == 'refreshToken') {
+        return cookie.value;
       }
-      return '';
+    }
+    return '';
   }
-
 
   DateTime get expiryDate => _state.expiryDate;
 
@@ -85,6 +83,7 @@ class KryptonClient {
 
   Future<void> register(String email, String password,
       [Map<String, dynamic> newFields]) async {
+    if (newFields == null) newFields = {};
     await this._query(
         new RegisterQuery({
           'fields': {'email': email, 'password': password, ...newFields}
@@ -93,7 +92,7 @@ class KryptonClient {
   }
 
   Future<Map<String, dynamic>> login(String email, String password) async {
-    await this._query(new LoginQuery({email, password}), false);
+    await this._query(new LoginQuery({'email': email, 'password': password}), false);
     return this._state.user;
   }
 
@@ -103,22 +102,22 @@ class KryptonClient {
   }
 
   Future<Map<String, dynamic>> update(Map<String, dynamic> fields) async {
-    await this._query(new UpdateQuery({fields}), true);
+    await this._query(new UpdateQuery({'fields': fields}), true);
     return this._state.user;
   }
 
   Future<void> delete(String password) async {
-    await this._query(new DeleteQuery({password}), true);
+    await this._query(new DeleteQuery({'password': password}), true);
     _state = new _KryptonState();
   }
 
   Future<void> recoverPassword(String email) async {
-    await this._query(new SendPasswordRecoveryQuery({email}), true);
+    await this._query(new SendPasswordRecoveryQuery({'email': email}), true);
   }
 
   Future<bool> isEmailAvailable(String email) async {
     Map<String, dynamic> data =
-        await this._query(new EmailAvailableQuery({email}), false);
+        await this._query(new EmailAvailableQuery({'email': email}), false);
     return data['emailAvailable'];
   }
 
@@ -140,14 +139,14 @@ class KryptonClient {
   Future<Map<String, dynamic>> fetchUserOne(
       Map<String, dynamic> filter, List<String> requestedFields) async {
     Map<String, dynamic> data =
-        await this._query(new UserOneQuery({filter}, requestedFields), true);
+        await this._query(new UserOneQuery({'filter': filter}, requestedFields), true);
     return data['userOne'];
   }
 
   Future<List<Map<String, dynamic>>> fetchUserByIds(
       List<String> ids, List<String> requestedFields) async {
     Map<String, dynamic> data =
-        await this._query(new UserByIdsQuery({ids}, requestedFields), true);
+        await this._query(new UserByIdsQuery({'ids': ids}, requestedFields), true);
     return data['userByIds'];
   }
 
@@ -155,7 +154,7 @@ class KryptonClient {
       Map<String, dynamic> filter, List<String> requestedFields,
       [int limit]) async {
     Map<String, dynamic> data = await this
-        ._query(new UserManyQuery({filter, limit}, requestedFields), true);
+        ._query(new UserManyQuery({'filter': filter, 'limit': limit}, requestedFields), true);
     return data['userMany'];
   }
 
@@ -172,7 +171,7 @@ class KryptonClient {
   Future<Pagination> fetchUserWithPagination(Map<String, dynamic> filter,
       List<String> requestedFields, int page, int perPage) async {
     Map<String, dynamic> data = await this._query(
-        new UserPaginationQuery({filter, page, perPage}, requestedFields),
+        new UserPaginationQuery({'filter': filter, 'page': page, 'perPage': perPage}, requestedFields),
         true);
     return Pagination.fromJson(data['userPagination']);
   }
@@ -182,7 +181,7 @@ class KryptonClient {
     return data['publicKey'];
   }
 
-  Future<dynamic> _query(Query query, bool isAuthTokenRequired) async {
+  Future<Map<String, dynamic>> _query(Query query, bool isAuthTokenRequired) async {
     var headers = {
       Headers.contentTypeHeader: 'application/json',
     };
@@ -196,13 +195,13 @@ class KryptonClient {
     if (response.data['errors'] != null) {
       throw _parseKryptonException(response.data['errors']);
     }
-    if (response.data.data != null) {
-      _updateAuthData(response.data.data);
+    if (response.data['data'] != null) {
+      _updateAuthData(response.data['data']);
     }
-    return response.data.data;
+    return response.data['data'];
   }
 
-  Exception _parseKryptonException(List<Map<String, dynamic>> errors) {
+  Exception _parseKryptonException(List<dynamic> errors) {
     String errorType = errors[0]['type'];
     String message = errors[0]['message'];
     switch (errorType) {
