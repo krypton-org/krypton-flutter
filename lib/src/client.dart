@@ -37,7 +37,7 @@ class KryptonClient {
     await refreshToken();
   }
 
-  String getSessionId(String refreshToken) {
+  String getSessionId() {
     List<Cookie> results = _cookieJar.loadForRequest(Uri.parse(endpoint));
     for (Cookie cookie in results) {
       if (cookie.name == 'refreshToken') {

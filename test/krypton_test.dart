@@ -144,4 +144,35 @@ void main() {
       } catch (err) {}
     });
   });
+
+  group("Save and re-init Session", () {
+    KryptonClient kryptonClient1;
+    KryptonClient kryptonClient2;
+    final email = "save.init.session@example.com";
+    final password = 'iAmavalidPassw0rd';
+    setUp(() {
+      kryptonClient1 = KryptonClient("http://localhost:5000");
+      kryptonClient2 = KryptonClient("http://localhost:5000");
+    });
+
+    test('Save and re-init Session', () async {
+      await kryptonClient1.register(email, password);
+      await kryptonClient1.login(email, password);
+      expect(await kryptonClient1.isLoggedIn(), true);
+      expect(kryptonClient1.user['email'], email);
+
+      String refreshToken = kryptonClient1.getSessionId();
+      await kryptonClient2.initSessionId(refreshToken);
+
+      expect(await kryptonClient2.isLoggedIn(), true);
+      expect(kryptonClient2.user['email'], email);
+    });
+
+    tearDown(() async {
+      try {
+        await kryptonClient1.login(email, password);
+        await kryptonClient1.delete(password);
+      } catch (err) {}
+    });
+  });
 }
