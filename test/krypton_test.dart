@@ -175,4 +175,100 @@ void main() {
       } catch (err) {}
     });
   });
+
+  group("Update email", () {
+    KryptonClient kryptonClient;
+    final email = "update.email@example.com";
+    final email2 = "update.email@example.com";
+    final password = 'iAmavalidPassw0rd';
+    setUp(() {
+      kryptonClient = KryptonClient("http://localhost:5000");
+    });
+
+    test('Update email', () async {
+      await kryptonClient.register(email, password);
+      await kryptonClient.login(email, password);
+      String previousId = kryptonClient.user['_id'];
+      await kryptonClient.update({'email': email2});
+      await kryptonClient.logout();
+      expect(await kryptonClient.isLoggedIn(), false);
+      await kryptonClient.login(email2, password);
+      expect(previousId, kryptonClient.user['_id']);
+    });
+
+    tearDown(() async {
+      try {
+        await kryptonClient.login(email2, password);
+        await kryptonClient.delete(password);
+      } catch (err) {}
+      try {
+        await kryptonClient.login(email, password);
+        await kryptonClient.delete(password);
+      } catch (err) {}
+    });
+  });
+
+  group("Change password", () {
+    KryptonClient kryptonClient;
+    final email = "change.password@example.com";
+    final password = 'iAmavalidPassw0rd';
+    final newPassword = 'iAmavalidPassw0rd';
+
+    setUp(() {
+      kryptonClient = KryptonClient("http://localhost:5000");
+    });
+
+    test('Change password', () async {
+      await kryptonClient.register(email, password);
+      await kryptonClient.login(email, password);
+      expect(await kryptonClient.isLoggedIn(), true);
+      await kryptonClient.changePassword(password, newPassword);
+      await kryptonClient.logout();
+      expect(await kryptonClient.isLoggedIn(), false);
+      await kryptonClient.login(email, newPassword);
+      expect(await kryptonClient.isLoggedIn(), true);
+    });
+
+    tearDown(() async {
+      try {
+        await kryptonClient.login(email, password);
+        await kryptonClient.delete(password);
+      } catch (err) {}
+      try {
+        await kryptonClient.login(email, newPassword);
+        await kryptonClient.delete(password);
+      } catch (err) {}
+    });
+  });
+
+  group("Delete account", () {
+    KryptonClient kryptonClient;
+    final email = "delete.account@example.com";
+    final password = 'iAmavalidPassw0rd';
+
+    setUp(() {
+      kryptonClient = KryptonClient("http://localhost:5000");
+    });
+
+    test('Change password', () async {
+      await kryptonClient.register(email, password);
+      await kryptonClient.login(email, password);
+      expect(await kryptonClient.isLoggedIn(), true);
+      await kryptonClient.delete(password);
+      expect(await kryptonClient.isLoggedIn(), false);
+      try {
+        await kryptonClient.login(email, password);
+        fail("exception not thrown");
+      } catch (e) {
+        expect(e, isA<UserNotFoundException>());
+      }
+    });
+
+    tearDown(() async {
+      try {
+        await kryptonClient.login(email, password);
+        await kryptonClient.delete(password);
+      } catch (err) {}
+    });
+  });
 }
