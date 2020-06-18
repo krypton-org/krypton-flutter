@@ -15,7 +15,7 @@ void main() {
     final email = "register@example.com";
     final password = 'iAmavalidPassw0rd';
     setUp(() {
-      kryptonClient = KryptonClient("http://localhost:5000");
+      kryptonClient = KryptonClient(endpoint: "http://localhost:5000");
     });
 
     /// This test should not throw any exception
@@ -38,7 +38,7 @@ void main() {
     final email = "get.user@example.com";
     final password = 'iAmavalidPassw0rd';
     setUp(() {
-      kryptonClient = KryptonClient("http://localhost:5000");
+      kryptonClient = KryptonClient(endpoint: "http://localhost:5000");
     });
 
     /// This test should not throw any exception
@@ -69,7 +69,7 @@ void main() {
     final email = "login@example.com";
     final password = 'iAmavalidPassw0rd';
     setUp(() {
-      kryptonClient = KryptonClient("http://localhost:5000");
+      kryptonClient = KryptonClient(endpoint: "http://localhost:5000");
     });
 
     test(
@@ -98,7 +98,7 @@ void main() {
       final email = "logout.user@example.com";
       final password = 'iAmavalidPassw0rd';
       setUp(() {
-        kryptonClient = KryptonClient("http://localhost:5000");
+        kryptonClient = KryptonClient(endpoint: "http://localhost:5000");
       });
 
       /// This test should not throw any exception
@@ -128,7 +128,7 @@ void main() {
     final email = "john.doe@example.com";
     final password = 'iAmavalidPassw0rd';
     setUp(() {
-      kryptonClient = KryptonClient("http://localhost:5000");
+      kryptonClient = KryptonClient(endpoint: "http://localhost:5000");
     });
 
     test('delete existing user, should succeed', () async {
@@ -148,11 +148,15 @@ void main() {
   group("Save and re-init Session", () {
     KryptonClient kryptonClient1;
     KryptonClient kryptonClient2;
+    String refreshToken;
+
     final email = "save.init.session@example.com";
     final password = 'iAmavalidPassw0rd';
     setUp(() {
-      kryptonClient1 = KryptonClient("http://localhost:5000");
-      kryptonClient2 = KryptonClient("http://localhost:5000");
+      kryptonClient1 = KryptonClient(
+          endpoint: "http://localhost:5000",
+          saveRefreshTokenClbk: (token) => refreshToken = token);
+      kryptonClient2 = KryptonClient(endpoint: "http://localhost:5000");
     });
 
     test('Save and re-init Session', () async {
@@ -160,9 +164,8 @@ void main() {
       await kryptonClient1.login(email, password);
       expect(await kryptonClient1.isLoggedIn(), true);
       expect(kryptonClient1.user['email'], email);
-
-      String refreshToken = kryptonClient1.getSessionId();
-      await kryptonClient2.initSessionId(refreshToken);
+      expect(refreshToken != null, true);
+      await kryptonClient2.setRefreshToken(refreshToken);
 
       expect(await kryptonClient2.isLoggedIn(), true);
       expect(kryptonClient2.user['email'], email);
@@ -182,7 +185,7 @@ void main() {
     final email2 = "update.email@example.com";
     final password = 'iAmavalidPassw0rd';
     setUp(() {
-      kryptonClient = KryptonClient("http://localhost:5000");
+      kryptonClient = KryptonClient(endpoint: "http://localhost:5000");
     });
 
     test('Update email', () async {
@@ -215,7 +218,7 @@ void main() {
     final newPassword = 'iAmavalidPassw0rd';
 
     setUp(() {
-      kryptonClient = KryptonClient("http://localhost:5000");
+      kryptonClient = KryptonClient(endpoint: "http://localhost:5000");
     });
 
     test('Change password', () async {
@@ -247,7 +250,7 @@ void main() {
     final password = 'iAmavalidPassw0rd';
 
     setUp(() {
-      kryptonClient = KryptonClient("http://localhost:5000");
+      kryptonClient = KryptonClient(endpoint: "http://localhost:5000");
     });
 
     test('Change password', () async {

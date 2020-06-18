@@ -22,29 +22,22 @@ class KryptonClient {
   int minTimeToLive;
   Dio _dio;
   CookieJar _cookieJar;
-
-  KryptonClient(this.endpoint,
-      {sessionID = null, this.minTimeToLive = DEFAULT_MIN_TIME_TO_LIVE}) {
+  Function(String) saveRefreshTokenClbk;
+  KryptonClient(
+      {this.endpoint,
+      refreshToken = null,
+      this.saveRefreshTokenClbk,
+      this.minTimeToLive = DEFAULT_MIN_TIME_TO_LIVE}) {
     _state = new _KryptonState();
     _dio = new Dio();
     _cookieJar = CookieJar();
     _dio.interceptors.add(CookieManager(_cookieJar));
   }
 
-  Future<void> initSessionId(String sessionId) async {
+  Future<void> setRefreshToken(String sessionId) async {
     List<Cookie> cookies = [new Cookie('refreshToken', sessionId)];
     _cookieJar.saveFromResponse(Uri.parse(endpoint), cookies);
     await refreshToken();
-  }
-
-  String getSessionId() {
-    List<Cookie> results = _cookieJar.loadForRequest(Uri.parse(endpoint));
-    for (Cookie cookie in results) {
-      if (cookie.name == 'refreshToken') {
-        return cookie.value;
-      }
-    }
-    return '';
   }
 
   DateTime get expiryDate => _state.expiryDate;
@@ -241,6 +234,9 @@ class KryptonClient {
     } else if (data['updateMe'] != null) {
       _setState(data['updateMe']);
     }
+    if (this.saveRefreshTokenClbk != null) {
+      this.saveRefreshTokenClbk(_getRefreshToken());
+    }
   }
 
   Map<String, dynamic> _decodeToken(String token) {
@@ -256,6 +252,16 @@ class KryptonClient {
         token: dataItemContent['token'],
         expiryDate: DateTime.parse(dataItemContent['expiryDate']),
         user: _decodeToken(dataItemContent['token']));
+  }
+
+  String _getRefreshToken() {
+    List<Cookie> results = _cookieJar.loadForRequest(Uri.parse(endpoint));
+    for (Cookie cookie in results) {
+      if (cookie.name == 'refreshToken') {
+        return cookie.value;
+      }
+    }
+    return '';
   }
 }
 
