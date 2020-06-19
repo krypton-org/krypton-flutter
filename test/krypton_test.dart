@@ -166,9 +166,12 @@ void main() {
       expect(kryptonClient1.user['email'], email);
       expect(refreshToken != null, true);
       await kryptonClient2.setRefreshToken(refreshToken);
-
       expect(await kryptonClient2.isLoggedIn(), true);
       expect(kryptonClient2.user['email'], email);
+
+      String previousRefreshToken = refreshToken;
+      await kryptonClient1.refreshToken();
+      expect(previousRefreshToken == refreshToken, false);
     });
 
     tearDown(() async {
