@@ -25,19 +25,22 @@ class KryptonClient {
   Function(String) saveRefreshTokenClbk;
   KryptonClient(
       {this.endpoint,
-      refreshToken = null,
+      String refreshToken = null,
       this.saveRefreshTokenClbk,
       this.minTimeToLive = DEFAULT_MIN_TIME_TO_LIVE}) {
     _state = new _KryptonState();
     _dio = new Dio();
     _cookieJar = CookieJar();
     _dio.interceptors.add(CookieManager(_cookieJar));
+    if (refreshToken != null) {
+      setRefreshToken(refreshToken);
+    }
   }
 
-  Future<void> setRefreshToken(String sessionId) async {
-    List<Cookie> cookies = [new Cookie('refreshToken', sessionId)];
+  Future<void> setRefreshToken(String refreshToken) async {
+    List<Cookie> cookies = [new Cookie('refreshToken', refreshToken)];
     _cookieJar.saveFromResponse(Uri.parse(endpoint), cookies);
-    await refreshToken();
+    await this.refreshToken();
   }
 
   DateTime get expiryDate => _state.expiryDate;
@@ -194,7 +197,7 @@ class KryptonClient {
       throw _parseKryptonException(response.data['errors']);
     }
     if (response.data['data'] != null) {
-      _updateAuthData(response.data['data']);
+      await _updateAuthData(response.data['data']);
     }
     return response.data['data'];
   }
@@ -226,7 +229,7 @@ class KryptonClient {
     }
   }
 
-  void _updateAuthData(Map<String, dynamic> data) {
+  void _updateAuthData(Map<String, dynamic> data) async {
     if (data['login'] != null) {
       _setState(data['login']);
     } else if (data['refreshToken'] != null) {
@@ -235,7 +238,7 @@ class KryptonClient {
       _setState(data['updateMe']);
     }
     if (this.saveRefreshTokenClbk != null) {
-      this.saveRefreshTokenClbk(_getRefreshToken());
+      await this.saveRefreshTokenClbk(_getRefreshToken());
     }
   }
 
