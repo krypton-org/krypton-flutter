@@ -25,16 +25,12 @@ class KryptonClient {
   Function(String) saveRefreshTokenClbk;
   KryptonClient(
       {this.endpoint,
-      String refreshToken = null,
       this.saveRefreshTokenClbk,
       this.minTimeToLive = DEFAULT_MIN_TIME_TO_LIVE}) {
     _state = new _KryptonState();
     _dio = new Dio();
     _cookieJar = CookieJar();
     _dio.interceptors.add(CookieManager(_cookieJar));
-    if (refreshToken != null) {
-      setRefreshToken(refreshToken);
-    }
   }
 
   Future<void> setRefreshToken(String refreshToken) async {
