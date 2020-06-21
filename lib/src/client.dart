@@ -23,20 +23,22 @@ class KryptonClient {
   Dio _dio;
   CookieJar _cookieJar;
   Function(String) saveRefreshTokenClbk;
+
   KryptonClient(
       {this.endpoint,
       this.saveRefreshTokenClbk,
       this.minTimeToLive = DEFAULT_MIN_TIME_TO_LIVE}) {
-    _state = new _KryptonState();
-    _dio = new Dio();
-    _cookieJar = CookieJar();
-    _dio.interceptors.add(CookieManager(_cookieJar));
+    _init();
   }
 
   Future<void> setRefreshToken(String refreshToken) async {
-    List<Cookie> cookies = [new Cookie('refreshToken', refreshToken)];
+    List<Cookie> cookies = [Cookie.fromSetCookieValue(refreshToken)];
     _cookieJar.saveFromResponse(Uri.parse(endpoint), cookies);
     await this.refreshToken();
+  }
+
+  void reinitialize() {
+    _init();
   }
 
   DateTime get expiryDate => _state.expiryDate;
@@ -257,10 +259,17 @@ class KryptonClient {
     List<Cookie> results = _cookieJar.loadForRequest(Uri.parse(endpoint));
     for (Cookie cookie in results) {
       if (cookie.name == 'refreshToken') {
-        return cookie.value;
+        return cookie.toString();
       }
     }
     return '';
+  }
+
+  void _init() {
+    _state = new _KryptonState();
+    _dio = new Dio();
+    _cookieJar = CookieJar();
+    _dio.interceptors.add(CookieManager(_cookieJar));
   }
 }
 
